@@ -6,6 +6,23 @@
 #include<vector>
 #include<cmath>
 using namespace std;
+void gray_scale(string filename) {
+    Image image(filename);
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            unsigned int avg = 0;
+            for (int k = 0; k < 3; ++k) {
+                avg += image(i, j, k);
+            }
+            avg /= 3;
+            // Set the pixel values to the average grayscale value
+            for (int k = 0; k < 3; ++k) {
+                image(i, j, k) = avg;
+            }
+        }
+    }
+    image.saveImage("CURRENT_VERSION.jpg");
+}
 
 void invert_colors(string filename)
 {
@@ -22,6 +39,116 @@ void invert_colors(string filename)
     }
     stbi_write_jpg(filename.c_str(), width, height, channels, imageData, 100);
     stbi_image_free(imageData);
+}
+Image manualResizeImage(Image image, int new_width, int new_height) {
+    int originalWidth = image.width;
+    int originalHeight = image.height;
+
+    Image resizedImage(new_width, new_height);
+
+    // Calculate the scaling factors for width and height
+    float widthRatio = static_cast<float>(originalWidth) / new_width;
+    float heightRatio = static_cast<float>(originalHeight) / new_height;
+
+    // Resize loop
+    for (int i = 0; i < new_width; ++i) {
+        for (int j = 0; j < new_height; ++j) {
+            // Calculate the corresponding position in the original image
+            int originalX = static_cast<int>(i * widthRatio);
+            int originalY = static_cast<int>(j * heightRatio);
+
+            // Get the pixel value from the original image and set it in the resized image
+            for (int k = 0; k < 3; ++k) {
+                unsigned char pixelValue = image.getPixel(originalX, originalY, k);
+                resizedImage.setPixel(i, j, k, pixelValue);
+            }
+        }
+    }
+
+    return resizedImage;
+}
+
+// Function to merge two images by resizing to the largest dimensions
+Image mergeResizeToMax( Image image1,  Image image2) {
+    // Determine the maximum dimensions
+    int max_width = std::max(image1.width, image2.width);
+    int max_height = std::max(image1.height, image2.height);
+
+    // Resize both images to the maximum dimensions
+    Image resizedImage1 = manualResizeImage(image1, max_width, max_height);
+    Image resizedImage2 = manualResizeImage(image2, max_width, max_height);
+
+    Image mergedImage(max_width, max_height);
+    for (int i = 0; i < max_width; ++i) {
+        for (int j = 0; j < max_height; ++j) {
+            // Blend pixel values using the alpha value
+            for (int k = 0; k < 3; ++k) {
+                unsigned char pixel1 = resizedImage1.getPixel(i, j, k);
+                unsigned char pixel2 = resizedImage2.getPixel(i, j, k);
+                unsigned char blendedPixel = static_cast<unsigned char>((0.5 * pixel1) + (0.5 * pixel2));
+                mergedImage.setPixel(i, j, k, blendedPixel);
+            }
+        }
+    }
+    mergedImage.saveImage("merged_image_resized4.png");
+
+    return mergedImage;
+}
+
+// Function to merge two images by overlapping the common area of smaller width and height
+Image mergeOverlapCommonArea(Image image1,Image image2) {
+    // Determine the common area dimensions
+    int min_width = std::min(image1.width, image2.width);
+    int min_height = std::min(image1.height, image2.height);
+    Image mergedImage(min_width, min_height);
+    for (int i = 0; i < min_width; ++i) {
+        for (int j = 0; j < min_height; ++j) {
+            // Blend pixel values using the alpha value
+            for (int k = 0; k < 3; ++k) {
+                unsigned char pixel1 = image1.getPixel(i, j, k);
+                unsigned char pixel2 = image2.getPixel(i, j, k);
+                unsigned char blendedPixel = static_cast<unsigned char>((0.5* pixel1) + (0.5 * pixel2));
+                mergedImage.setPixel(i, j, k, blendedPixel);
+            }
+        }
+    }
+    mergedImage.saveImage("merged_image_overlap4.png");
+
+    return mergedImage;
+}
+
+void merge(string filename) {
+    // Load two images
+    Image image1(filename);
+    string filename2,original;
+    bool validFilename = false;
+    while (!validFilename) {
+        cout << "Enter the name of the image file (with extension): ";
+        cin >> filename2;
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "File '" << filename << "' not found. Please enter a valid filename with valid extention\n." << endl;
+        } else {
+            validFilename = true;
+        }
+    }
+    Image image2(filename2);
+
+    // Prompt the user for their choice
+    cout << "Choose merging option:\n";
+    cout << "1-Maximuim image.\n";
+    cout << "2-Merge the common area of the smaller width and height.\n";
+    int option;
+    cin >> option;
+
+    Image mergedImage;
+    if (option == 1) {
+        mergedImage = mergeResizeToMax(image1, image2);
+    } else if (option == 2) {
+        mergedImage = mergeOverlapCommonArea(image1, image2);
+    } else {
+        cout << " Exit";
+    }
 }
 
 
@@ -114,6 +241,33 @@ void Rotation1(string filename)
 
     img.saveImage("CURRENT_VERSION.jpg");
 }
+void brightness_and_whigthness(string filename) {
+    // Load the image
+    Image image(filename);
+    // Factor for darkness or brightness adjustment
+    float factor = 0.5; // Example factor value (0.5 for darkness, 1.5 for brightness)
+
+    // Adjust darkness or brightness of the image
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                // Apply darkness or brightness adjustment
+                int newValue = static_cast<int>(image(i, j, k) * factor);
+
+                // Ensure the value stays within [0, 255] range
+                newValue = min(max(newValue, 0), 255);
+
+                // Update pixel value
+                image(i, j, k) = newValue;
+            }
+        }
+    }
+
+    // Save the modified image
+    image.saveImage("CURRENT_VERSION.jpg");
+
+}
+
 
 enum Frame {Fancy,Simple};
 int colors[6][3] = {
@@ -200,6 +354,73 @@ void frame (string filename) {
             continue;
         }
     }
+}
+Image applySobel(Image image, int threshold = 128) {
+    Image result(image.width, image.height);
+
+    // Sobel operator kernels
+    int sobelXKernel[3][3] = {{-1, 0, 1},
+                              {-2, 0, 2},
+                              {-1, 0, 1}};
+    int sobelYKernel[3][3] = {{-1, -2, -1},
+                              {0, 0, 0},
+                              {1, 2, 1}};
+
+    for (int i = 1; i < image.width - 1; ++i) {
+        for (int j = 1; j < image.height - 1; ++j) {
+            int gradientX = 0;
+            int gradientY = 0;
+
+            // Convolve image with Sobel kernels
+            for (int x = -1; x <= 1; ++x) {
+                for (int y = -1; y <= 1; ++y) {
+                    gradientX += sobelXKernel[x + 1][y + 1] * image.getPixel(i + x, j + y, 0);
+                    gradientY += sobelYKernel[x + 1][y + 1] * image.getPixel(i + x, j + y, 0);
+                }
+            }
+
+            // Calculate gradient magnitude
+            int gradientMagnitude = sqrt(gradientX * gradientX + gradientY * gradientY);
+
+
+            if (gradientMagnitude >= threshold) {
+
+                for (int k = 0; k < 3; ++k) {
+                    result.setPixel(i, j, k, 255);
+                }
+            } else {
+
+                for (int k = 0; k < 3; ++k) {
+                    result.setPixel(i, j, k, 0);
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+Image convertToBlackAndWhite(Image& image, unsigned int threshold = 128) {
+    Image sobelImage = applySobel(image, threshold);
+    Image result(image.width, image.height);
+
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            unsigned int grey = sobelImage.getPixel(i, j, 0);
+
+            if (grey < threshold) {
+                for (int k = 0; k < 3; ++k) {
+                    result.setPixel(i, j, k, 255);
+                }
+            } else {
+                for (int k = 0; k < 3; ++k) {
+                    result.setPixel(i, j, k, 0);
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 
@@ -330,7 +551,7 @@ int main()
 
     while(true)
     {
-        cout << "1_Load a new image\n"<<"2_Invert_color\n"<<"3_Rotation\n"<<"4_Blur_image\n"<<"5_Add_frame\n"<<"6_Save_image\n"<<"7_Exit\n";
+        cout << "1_Load a new image\n"<<"2_Merge images\n"<<"3_Black and white\n"<<"4_Invert_color\n"<<"5_Gray_scale\n"<<"6_ dark and lighten image\n"<<"7_Rotation\n"<<"8_Blur_image\n"<<"9_Add_frame\n"<<"10_Purple_image\n"<<"11_Crop_image\n"<<"12_Resize_image\n"<<"13_Exit\n";
         cout << "Enter your choice: ";
         char choice;
         cin>>choice;
@@ -345,27 +566,59 @@ int main()
 
             original = filename;
         }
-        else if(choice=='2')
+        if(choice=='2')
         {
-            invert_colors(filename);
+            merge(filename);
         }
         else if(choice=='3')
         {
-            Rotation1(filename);
+            filter2(filename);
         }
         else if(choice=='4')
         {
-            filter12(filename);
+            invert_colors(filename);
         }
         else if(choice=='5')
         {
-            frame(filename);
+            gray_scale(filename);
         }
         else if(choice=='6')
         {
-            saveImage(filename);
+            brightness_and_whigthness(filename);
         }
         else if(choice=='7')
+        {
+            Rotation1(filename);
+        }
+        else if(choice=='8')
+        {
+            filter12(filename);
+        }
+        else if(choice=='9')
+        {
+            frame(filename);
+        }
+        else if(choice=='10')
+        {
+            filter16(filename);
+        }
+        else if(choice=='11')
+        {
+            filter8(filename);
+        }
+        else if(choice=='12')
+        {
+            filter11(filename);
+        }
+        else if(choice=='13')
+        {
+            filter5(filename);
+        }
+        else if(choice=='14')
+        {
+            filter10(filename);
+        }
+        else if(choice=='13')
         {
             cout<<"Thanks for using our programme.";
             break;
@@ -377,3 +630,19 @@ int main()
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
