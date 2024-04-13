@@ -24,6 +24,29 @@ void gray_scale(string filename) {
     image.saveImage("CURRENT_VERSION.jpg");
 }
 
+void filter2(string filename) {
+    Image image(filename);
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            unsigned int avg = 0;
+            for (int k = 0; k < image.channels; ++k) {
+                avg += image(i, j, k);
+            }
+            avg = avg / 3; // Calculate average RGB value
+
+            // Convert to black and white
+            unsigned int threshold = 128; // Threshold for converting to black or white
+            unsigned int bw_value = (avg < threshold) ? 0
+                                                      : 255; // If average is less than threshold, set to black, else white
+
+            // Set all channels to the same black and white value
+            for (int k = 0; k < 3; ++k) {
+                image(i, j, k) = bw_value;
+            }
+        }
+    }
+    image.saveImage("CURRENT_VERSION.jpg");
+
 void invert_colors(string filename)
 {
 
@@ -151,6 +174,49 @@ void merge(string filename) {
     }
 }
 
+void filter5(string filename) {
+    // Load the original image
+    Image img(filename);
+
+    // Create a new image with the same dimensions as the original
+    Image flippedImg(img.width, img.height); // Swap width and height
+
+    cout << "1-Horizontal Flip , 2-Vertical Flip" << endl ;
+    int choice ;
+    cin >> choice ;
+    if(choice==1){
+        Image Horizontal_Flip(img.width, img.height);
+
+        for (int i = 0; i < img.height; ++i) {
+            for (int j = 0; j < img.width; ++j) {
+                for (int k = 0; k < img.channels; ++k) {
+                    // Swap pixel values horizontally
+                    flippedImg(img.width - j - 1, i, k) = img(j, i, k); // Corrected indices
+                }
+            }
+        }
+
+        // Save the horizontally flipped image
+        flippedImg.saveImage("CURRENT_VERSION.jpg");
+
+    }
+    else if(choice==2){
+        Image Vertical_Flip(img.width, img.height);
+        // Vertical Flip: Swap pixels from top to bottom
+        for (int i = 0; i < img.height; ++i) {
+            for (int j = 0; j < img.width; ++j) {
+                for (int k = 0; k < img.channels; ++k) {
+                    // Swap pixel values vertically
+                    flippedImg(j, img.height - i - 1, k) = img(j, i, k); // Corrected indices
+                }
+            }
+        }
+
+        // Save the vertically flipped image
+        flippedImg.saveImage("CURRENT_VERSION.jpg");
+
+    }
+}
 
 enum Rotation { ROTATE_90, ROTATE_180, ROTATE_270 };
 void rotateImage(Image &img, Rotation rotation) {
@@ -278,6 +344,32 @@ int colors[6][3] = {
         {0, 0, 255},   // Blue
         {255, 0, 255}  // Magenta
 };
+
+void filter8(string filename) {
+    // Load the original image
+    Image img(filename);
+
+    // Prompt user for cropping parameters
+    int x, y, crop_width, crop_height;
+    cout << "Enter the starting point (x, y) of the area to crop: ";
+    cin >> x >> y;
+    cout << "Enter the dimensions (width x height) of the area to crop: ";
+    cin >> crop_width >> crop_height;
+
+    // Create a new image for the cropped result
+    Image croppedImg(crop_height, crop_width);
+
+    // Iterate over the cropped region and copy pixels from the original image
+    for (int i = 0; i < crop_width; ++i) {
+        for (int j = 0; j < crop_height; ++j) {
+            for (int k = 0; k < img.channels; ++k) {
+                croppedImg(j, i, k) = img(y + j, x + i, k); // Copy pixels from original image to cropped image
+            }
+        }
+    }
+
+    croppedImg.saveImage("CURRENT_VERSION.jpg");
+}
 
 void addFrame(Image &img, int frameSize, int red, int green, int blue,Frame frame) {
     int width = img.width;
@@ -421,6 +513,40 @@ Image convertToBlackAndWhite(Image& image, unsigned int threshold = 128) {
     }
 
     return result;
+}
+
+
+void filter11(string filename) {
+    Image img(filename);
+
+    int newWidth, newHeight;
+    cout << "Enter the new width: ";
+    cin >> newWidth;
+    cout << "Enter the new height: ";
+    cin >> newHeight;
+
+    Image resizedImg(newWidth, newHeight);
+
+    // Calculate the scaling factors for width and height
+    float widthScale = static_cast<float>(img.width) / newWidth;
+    float heightScale = static_cast<float>(img.height) / newHeight;
+
+    // Loop through each pixel of the resized image
+    for (int i = 0; i < newWidth; ++i) {
+        for (int j = 0; j < newHeight; ++j) {
+            // Calculate the corresponding pixel position in the original image
+            int original_i = static_cast<int>(i * widthScale);
+            int original_j = static_cast<int>(j * heightScale);
+
+            // Copy pixel values from the original image to the resized image
+            for (int k = 0; k < img.channels; ++k) {
+                resizedImg(i, j, k) = img(original_i, original_j, k);
+            }
+        }
+    }
+
+    resizedImg.saveImage("CURRENT_VERSION.jpg");
+
 }
 
 
