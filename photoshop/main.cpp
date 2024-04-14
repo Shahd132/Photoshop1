@@ -113,7 +113,7 @@ Image mergeResizeToMax( Image image1,  Image image2) {
             }
         }
     }
-    mergedImage.saveImage("merged_image_resized4.png");
+    mergedImage.saveImage("CURRENT_VERSION.jpg");
 
     return mergedImage;
 }
@@ -135,7 +135,7 @@ Image mergeOverlapCommonArea(Image image1,Image image2) {
             }
         }
     }
-    mergedImage.saveImage("merged_image_overlap4.png");
+    mergedImage.saveImage("CURRENT_VERSION.jpg");
 
     return mergedImage;
 }
@@ -679,7 +679,7 @@ int main()
     {
         cout << "1_Load a new image\n"<<"2_Merge images\n"<<"3_Black and white\n"<<"4_Invert_color\n"<<"5_Gray_scale\n"<<"6_ dark and lighten image\n"<<"7_Rotation\n"<<"8_Blur_image\n"<<"9_Add_frame\n"<<"10_Purple_image\n"<<"11_Crop_image\n"<<"12_Resize_image\n"<<"13_Exit\n";
         cout << "Enter your choice: ";
-        char choice;
+        int choice;
         cin>>choice;
         if(choice=='1')
         {
