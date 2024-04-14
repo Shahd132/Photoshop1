@@ -6,7 +6,7 @@
 #include<vector>
 #include<cmath>
 using namespace std;
-void gray_scale(string filename) {
+void gray_scale(string filename) {//filter1
     Image image(filename);
     for (int i = 0; i < image.width; ++i) {
         for (int j = 0; j < image.height; ++j) {
@@ -23,8 +23,8 @@ void gray_scale(string filename) {
     }
     image.saveImage("CURRENT_VERSION.jpg");
 }
-
-void filter2(string filename) {
+//end
+void filter2(string filename) {//filter2
     Image image(filename);
     for (int i = 0; i < image.width; ++i) {
         for (int j = 0; j < image.height; ++j) {
@@ -46,8 +46,9 @@ void filter2(string filename) {
         }
     }
     image.saveImage("CURRENT_VERSION.jpg");
-
-void invert_colors(string filename)
+}
+//end filter2
+void invert_colors(string filename)//filter3
 {
 
     unsigned char *imageData;
@@ -63,7 +64,8 @@ void invert_colors(string filename)
     stbi_write_jpg(filename.c_str(), width, height, channels, imageData, 100);
     stbi_image_free(imageData);
 }
-Image manualResizeImage(Image image, int new_width, int new_height) {
+//end filter3
+Image manualResizeImage(Image image, int new_width, int new_height) {//filter4
     int originalWidth = image.width;
     int originalHeight = image.height;
 
@@ -148,9 +150,9 @@ void merge(string filename) {
     while (!validFilename) {
         cout << "Enter the name of the image file (with extension): ";
         cin >> filename2;
-        ifstream file(filename);
+        ifstream file(filename2);
         if (!file.is_open()) {
-            cout << "File '" << filename << "' not found. Please enter a valid filename with valid extention\n." << endl;
+            cout << "File '" << filename2 << "' not found. Please enter a valid filename with valid extention\n." << endl;
         } else {
             validFilename = true;
         }
@@ -171,10 +173,11 @@ void merge(string filename) {
         mergedImage = mergeOverlapCommonArea(image1, image2);
     } else {
         cout << " Exit";
+
     }
 }
-
-void filter5(string filename) {
+//end filter4
+void filter5(string filename) {//filter5
     // Load the original image
     Image img(filename);
 
@@ -217,8 +220,8 @@ void filter5(string filename) {
 
     }
 }
-
-enum Rotation { ROTATE_90, ROTATE_180, ROTATE_270 };
+//end filter5
+enum Rotation { ROTATE_90, ROTATE_180, ROTATE_270 };//filter6
 void rotateImage(Image &img, Rotation rotation) {
     if (rotation != ROTATE_90 && rotation != ROTATE_180 && rotation != ROTATE_270) {
         cout << "Invalid angle. Only 90, 180, or 270 degrees rotation is supported." << endl;
@@ -307,11 +310,30 @@ void Rotation1(string filename)
 
     img.saveImage("CURRENT_VERSION.jpg");
 }
-void brightness_and_whigthness(string filename) {
+//end filter6
+void filter7(string filename) {//filter7
     // Load the image
     Image image(filename);
+
+    // Prompt the user to choose darkening or lightening
+    cout << "Do you want to lighten or darken the image?\n"<< "1-lighten\n" <<"2-darken"<<endl;
+    int choice;
+    cin >> choice;
+
     // Factor for darkness or brightness adjustment
-    float factor = 0.5; // Example factor value (0.5 for darkness, 1.5 for brightness)
+    float factor;
+    if (choice == 1) {
+        cout << "Enter the percentage of lightening (0 to 100): ";
+        cin >> factor;
+        factor = 1.0 + (factor / 100.0); // Convert percentage to factor
+    } else if (choice == 2) {
+        cout << "Enter the percentage of darkening (0 to 100): ";
+        cin >> factor;
+        factor = 1.0 - (factor / 100.0); // Convert percentage to factor
+    } else {
+        cout << "Invalid choice. Please enter 'lighten' or 'darken'." <<endl;
+        return;
+    }
 
     // Adjust darkness or brightness of the image
     for (int i = 0; i < image.width; ++i) {
@@ -321,7 +343,7 @@ void brightness_and_whigthness(string filename) {
                 int newValue = static_cast<int>(image(i, j, k) * factor);
 
                 // Ensure the value stays within [0, 255] range
-                newValue = min(max(newValue, 0), 255);
+                newValue = std::min(std::max(newValue, 0), 255);
 
                 // Update pixel value
                 image(i, j, k) = newValue;
@@ -331,21 +353,9 @@ void brightness_and_whigthness(string filename) {
 
     // Save the modified image
     image.saveImage("CURRENT_VERSION.jpg");
-
 }
-
-
-enum Frame {Fancy,Simple};
-int colors[6][3] = {
-        {255, 0, 0},   // Red
-        {255, 255, 0}, // Yellow
-        {0, 255, 0},   // Green
-        {0, 255, 255}, // Cyan
-        {0, 0, 255},   // Blue
-        {255, 0, 255}  // Magenta
-};
-
-void filter8(string filename) {
+//end filter7
+void filter8(string filename) {//filter8
     // Load the original image
     Image img(filename);
 
@@ -370,6 +380,16 @@ void filter8(string filename) {
 
     croppedImg.saveImage("CURRENT_VERSION.jpg");
 }
+//end filter8
+enum Frame {Fancy,Simple};//filter9
+int colors[6][3] = {
+        {255, 0, 0},   // Red
+        {255, 255, 0}, // Yellow
+        {0, 255, 0},   // Green
+        {0, 255, 255}, // Cyan
+        {0, 0, 255},   // Blue
+        {255, 0, 255}  // Magenta
+};
 
 void addFrame(Image &img, int frameSize, int red, int green, int blue,Frame frame) {
     int width = img.width;
@@ -407,8 +427,6 @@ void addFrame(Image &img, int frameSize, int red, int green, int blue,Frame fram
 }
 
 void frame (string filename) {
-    // Load image (assuming it's named "input_image.jpg")
-    cin >> filename;
     Image img(filename);
 
     // Ask user for frame size and color
@@ -447,7 +465,8 @@ void frame (string filename) {
         }
     }
 }
-Image applySobel(Image image, int threshold = 128) {
+//end filter9
+Image applySobel(Image image, int threshold = 128) {//filter10
     Image result(image.width, image.height);
 
     // Sobel operator kernels
@@ -515,8 +534,13 @@ Image convertToBlackAndWhite(Image& image, unsigned int threshold = 128) {
     return result;
 }
 
-
-void filter11(string filename) {
+void filter10(string filename) {
+    Image image(filename);
+    Image ISobelImage = convertToBlackAndWhite(image);
+    ISobelImage.saveImage("CURRENT_VERSION.jpg");
+}
+//end filter10
+void filter11(string filename) {//filter11
     Image img(filename);
 
     int newWidth, newHeight;
@@ -548,10 +572,9 @@ void filter11(string filename) {
     resizedImg.saveImage("CURRENT_VERSION.jpg");
 
 }
-
-
+//end filter11
 // Function to apply a blur filter to the image
-void applyBlurFilter(vector<unsigned char>& imageData, int width, int height, int channels, int blurLevel) {
+void applyBlurFilter(vector<unsigned char>& imageData, int width, int height, int channels, int blurLevel) {//filter12
     // Define the blur kernel based on the blur level
     int kernelSize = 2 * blurLevel + 1;
     float kernelSum = pow(kernelSize, 2);
@@ -615,7 +638,61 @@ void filter12(string filename) {
 
 
 }
+//end filter12
+void filter16(string filename)//bonus
+{
+    Image inputImage(filename);
+    for (int y = 0; y < inputImage.height; y++) {
+        for (int x = 0; x < inputImage.width; x++) {
+            // Get original red and blue pixel values
+            unsigned char &red = inputImage.getPixel(x, y, 0);
+            unsigned char &blue = inputImage.getPixel(x, y, 2);
 
+            // Increase red and blue channels to make purple
+            red = min(255, red + 50); // Increase red, clamp to 255
+            blue = min(255, blue + 50); // Increase blue, clamp to 255
+        }
+    }
+
+    // Save the modified image
+    inputImage.saveImage("CURRENT_VERSION.jpg");
+}
+void filter17(string filename) {//bonus
+    Image image(filename);
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            image(i, j, 0) = 255;
+            int temp = 255 - image(i, j, 2); // Store the calculated value in temp
+            image(i, j, 2) = 255 - image(i, j, 1); // Use the calculated value from temp
+            image(i, j, 1) = temp; // Assign the stored value from temp to the green channel
+        }
+    }
+    image.saveImage("CURRENT_VERSION.jpg");
+}
+
+void filter13(string filename)//bonus
+{
+    // Create an Image object named "image" with the file "wano.jpg"
+    Image image(filename);
+
+    // Loop through each pixel in the image
+    for (int i = 0; i < image.height; ++i) {
+        for (int j = 0; j < image.width; ++j) {
+            // Get the original red, green, and blue pixel values at position (j, i)
+            unsigned char &red = image.getPixel(j, i, 0);
+            unsigned char &green = image.getPixel(j, i, 1);
+            unsigned char &blue = image.getPixel(j, i, 2);
+
+            // Adjust the pixel values to simulate natural sunlight effect
+            red = min(255, red + 35);    // Increase red intensity
+            green = min(255, green + 30);// Increase green intensity
+            blue = min(255, blue - 33);  // Decrease blue intensity
+        }
+    }
+
+    // Save the modified image with the filename "nutural_sunlight.jpg"
+    image.saveImage("CURRENT_VERSION.jpg");
+}
 void loadNewImage(string& currentImage) {
     string filename;
     bool validFilename = false;
@@ -639,15 +716,32 @@ void loadNewImage(string& currentImage) {
     }
     cout << "New image '" << currentImage << "' loaded.\n";
 }
+
 void saveImage(string& currentImage) {
     Image image(currentImage);
     if (currentImage.empty()) {
         cout << "No image loaded. Please load an image first.\n";
         return;
     }
-    string filename;
-    cout << "Enter the name of the image file (with extension): ";
-    cin >> filename;
+    string filename,original;
+    bool validFilename = false;
+    while (!validFilename) {
+        cout << "Enter the name of the image file (with extension): ";
+        cin >> filename;
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "File '" << filename << "' not found. Please enter a valid filename with valid extention\n." << endl;
+        }
+        else {
+            // Check if the file extension is valid
+            string ext = filename.substr(filename.find_last_of(".") + 1);
+            if (ext != "jpg" && ext != "bmp" && ext != "png") {
+                cout << "Invalid file extension. Please choose a file with '.jpg', '.bmp', or '.png' extension.\n";
+            } else {
+                validFilename = true;
+            }
+        }
+    }
     image.saveImage(filename);
 
     // Perform the save operation
@@ -665,8 +759,15 @@ int main()
         ifstream file(filename);
         if (!file.is_open()) {
             cout << "File '" << filename << "' not found. Please enter a valid filename with valid extention\n." << endl;
-        } else {
-            validFilename = true;
+        }
+        else {
+            // Check if the file extension is valid
+            string ext = filename.substr(filename.find_last_of(".") + 1);
+            if (ext != "jpg" && ext != "bmp" && ext != "png") {
+                cout << "Invalid file extension. Please choose a file with '.jpg', '.bmp', or '.png' extension.\n";
+            } else {
+                validFilename = true;
+            }
         }
     }
 
@@ -677,74 +778,85 @@ int main()
 
     while(true)
     {
-        cout << "1_Load a new image\n"<<"2_Merge images\n"<<"3_Black and white\n"<<"4_Invert_color\n"<<"5_Gray_scale\n"<<"6_ dark and lighten image\n"<<"7_Rotation\n"<<"8_Blur_image\n"<<"9_Add_frame\n"<<"10_Purple_image\n"<<"11_Crop_image\n"<<"12_Resize_image\n"<<"13_Exit\n";
+        cout << "1_Load a new image\n"<<"2_Merge images\n"<<"3_Black and white\n"<<"4_Invert_color\n"<<"5_Gray_scale\n"<<"6_ dark and lighten image\n"<<"7_Rotation\n"<<"8_Blur_image\n"<<"9_Add_frame\n"<<"10_Purple_image\n"<<"11_Crop_image\n"<<"12_Resize_image\n"<<"13_Flip_image\n"<<"14_Edge_detection\n"<<"15_Infrared_image\n"<<"16_Sunlight_image\n"<<"17_Save_image\n"<<"18_Exit\n";
         cout << "Enter your choice: ";
         int choice;
         cin>>choice;
-        if(choice=='1')
+        if(choice==1)
         {
             loadNewImage(filename);
 
             Image Temp_image(filename);
             Temp_image.saveImage("CURRENT_VERSION.jpg");
-            original = filename;
             filename = "CURRENT_VERSION.jpg";
-
             original = filename;
         }
-        if(choice=='2')
+        if(choice==2)
         {
             merge(filename);
         }
-        else if(choice=='3')
+        else if(choice==3)
         {
             filter2(filename);
         }
-        else if(choice=='4')
+        else if(choice==4)
         {
             invert_colors(filename);
         }
-        else if(choice=='5')
+        else if(choice==5)
         {
             gray_scale(filename);
         }
-        else if(choice=='6')
+        else if(choice==6)
         {
-            brightness_and_whigthness(filename);
+            filter7(filename);
         }
-        else if(choice=='7')
+        else if(choice==7)
         {
             Rotation1(filename);
         }
-        else if(choice=='8')
+        else if(choice==8)
         {
             filter12(filename);
         }
-        else if(choice=='9')
+        else if(choice==9)
         {
             frame(filename);
         }
-        else if(choice=='10')
+        else if(choice==10)
         {
             filter16(filename);
         }
-        else if(choice=='11')
+        else if(choice==11)
         {
             filter8(filename);
         }
-        else if(choice=='12')
+        else if(choice==12)
         {
             filter11(filename);
         }
-        else if(choice=='13')
+        else if(choice==13)
         {
             filter5(filename);
         }
-        else if(choice=='14')
+        else if(choice==14)
         {
             filter10(filename);
         }
-        else if(choice=='13')
+
+        else if(choice==15)
+        {
+            filter17(filename);
+        }
+        else if(choice==16)
+        {
+            filter13(filename);
+        }
+        else if(choice==17)
+        {
+            saveImage(filename);
+        }
+        else if(choice==18)
         {
             cout<<"Thanks for using our programme.";
             break;
@@ -756,7 +868,6 @@ int main()
     }
     return 0;
 }
-
 
 
 
